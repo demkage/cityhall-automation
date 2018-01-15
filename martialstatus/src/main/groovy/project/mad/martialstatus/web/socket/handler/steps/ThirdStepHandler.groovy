@@ -2,6 +2,8 @@ package project.mad.martialstatus.web.socket.handler.steps
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import project.mad.martialstatus.config.Configuration
+import project.mad.martialstatus.web.socket.CityHallMartialStatusFlow
 import project.mad.martialstatus.web.socket.handler.AbstractSocketHandler
 import project.mad.martialstatus.web.socket.handler.qualifier.BackupSelectAppointmentStrategy
 import project.mad.martialstatus.web.socket.handler.qualifier.ThirdStepHandlerType
@@ -26,6 +28,12 @@ class ThirdStepHandler extends AbstractSocketHandler {
     @Inject
     @BackupSelectAppointmentStrategy
     ThirdStepSelectAppointmentsStrategy backupSelectStrategy
+
+    @Inject
+    Configuration configuration
+
+    @Inject
+    CityHallMartialStatusFlow flow
 
     @Override
     boolean accept(JsonObject object, Session session) {
@@ -62,5 +70,18 @@ class ThirdStepHandler extends AbstractSocketHandler {
                 .build()
 
         session.getBasicRemote().sendObject(jsonObject)
+
+        selected.entrySet().each {
+          entry ->
+            if(selected.getInt(entry.getKey()) > 0) {
+                log.info("Add to ignored days: {}", entry.getKey())
+                configuration.appointmentStrategy.ignoreDays.add(entry.getKey())
+          }
+        }
+
+        boolean allMatched = configuration.appointmentStrategy.ignoreDays
+            .containsAll(configuration.appointmentStrategy.preferableDays)
+
+        flow.makeNewAppointment = !allMatched
     }
 }

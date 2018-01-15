@@ -11,7 +11,8 @@ import java.util.concurrent.locks.ReentrantLock
 @Default
 class CityHallMartialStatusFlow {
     boolean closedByNotOpenYet
-    Phaser phaser = new Phaser(2)
+    boolean makeNewAppointment
+    Phaser phaser = new Phaser(0)
 
 
     void signalEnd() {
