@@ -33,13 +33,14 @@ class WebSocketController {
 
     private boolean connect(CityHallMartialStatusProgramClient client) {
         try {
+            flow.phaser.register()
             log.info("Connecting to: {}", configuration.network.webSocketUrl)
             WebSocketContainer webSocketContainer = ContainerProvider.getWebSocketContainer()
             Session session = webSocketContainer.connectToServer(client,
                     URI.create(configuration.network.webSocketUrl))
             flow.waitUntilEnd()
             log.info("Closed by not open yet: {}", flow.closedByNotOpenYet)
-            return !flow.closedByNotOpenYet
+            return !flow.closedByNotOpenYet && !flow.makeNewAppointment
         } catch (DeploymentException exception) {
             flow.signalEnd()
             return false

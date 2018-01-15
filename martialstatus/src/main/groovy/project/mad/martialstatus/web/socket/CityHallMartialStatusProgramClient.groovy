@@ -34,6 +34,7 @@ class CityHallMartialStatusProgramClient {
 
     @OnOpen
     void open(Session session) {
+        flow.phaser.register()
         log.info("Open session: " + session.getId())
     }
 

@@ -5,12 +5,15 @@ import org.slf4j.LoggerFactory
 
 import javax.enterprise.inject.Any
 import javax.json.JsonObject
+import javax.json.JsonObjectBuilder
 import javax.json.JsonValue
+import javax.json.spi.JsonProvider
 
 @Any
 class SelectAppointmentWithPreferableDays implements ThirdStepSelectAppointmentsStrategy {
     private final Logger log = LoggerFactory.getLogger(this.getClass())
     private List<String> preferableDays
+    private List<String> ignoreDays
     private int maxAppointments
 
     @Override
@@ -26,7 +29,11 @@ class SelectAppointmentWithPreferableDays implements ThirdStepSelectAppointments
         return null
     }
 
-    String keyWithPreferableDay(JsonObject object) {
+    String keyWithPreferableDay(JsonObject original) {
+        JsonObject object = removeIgnoredDays(original)
+
+        log.info("Remove days. Original: {}, Result: {}", original, object)
+
         findWithMostAppointmentsAvailable(object.entrySet().findAll {
             entry ->
                 preferableDays.find {
@@ -52,6 +59,19 @@ class SelectAppointmentWithPreferableDays implements ThirdStepSelectAppointments
 
         return selectedKey
     }
+
+  private removeIgnoredDays(JsonObject object) {
+    JsonProvider provider = JsonProvider.provider()
+    JsonObjectBuilder builder = provider.createObjectBuilder()
+
+    object.entrySet().each {
+      entry ->
+        if (entry.getValue() != null && ignoreDays.find { day -> entry.getKey() == day } == null)
+          builder.add(entry.getKey(), entry.getValue())
+    }
+
+    builder.build()
+  }
 
 
 }
