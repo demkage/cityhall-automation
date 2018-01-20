@@ -83,7 +83,7 @@ class ApplicationConfig {
         LoggerFactory.getLogger(this.getClass())
                 .info("Keys. '{}' : '{}'", keys.get("first"), keys.get("second"))
 
-        return new HashMap()
+        return keys
     }
 
     @Produces
