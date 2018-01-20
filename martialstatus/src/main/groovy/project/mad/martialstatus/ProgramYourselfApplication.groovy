@@ -14,15 +14,14 @@ import project.mad.martialstatus.web.socket.WebSocketController
 import project.mad.martialstatus.web.socket.handler.WebSocketHandler
 import project.mad.martialstatus.web.socket.handler.qualifier.WebSocketHandlerChainType
 
+import javax.enterprise.context.ApplicationScoped
 import javax.enterprise.inject.Default
 import javax.enterprise.inject.Produces
 import javax.enterprise.util.AnnotationLiteral
 import javax.inject.Inject
 import javax.inject.Singleton
-import javax.websocket.ContainerProvider
 import javax.websocket.DeploymentException
 import javax.websocket.Session
-import javax.websocket.WebSocketContainer
 
 @Singleton
 class ProgramYourselfApplication {
@@ -32,6 +31,7 @@ class ProgramYourselfApplication {
 
     @Produces
     @Default
+    @ApplicationScoped
     static Configuration configuration() {
         JsonSlurper jsonSlurper = new JsonSlurper()
 

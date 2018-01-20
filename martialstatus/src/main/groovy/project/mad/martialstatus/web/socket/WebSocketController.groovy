@@ -3,13 +3,13 @@ package project.mad.martialstatus.web.socket
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import project.mad.martialstatus.config.Configuration
+import project.mad.martialstatus.web.connection.WebSocketConnection
+import project.mad.martialstatus.web.connection.strategy.ConnectionStrategy
+import project.mad.martialstatus.web.connection.strategy.qualifier.AggressiveConnectionStrategyType
 
 import javax.enterprise.context.ApplicationScoped
 import javax.inject.Inject
-import javax.websocket.ContainerProvider
 import javax.websocket.DeploymentException
-import javax.websocket.Session
-import javax.websocket.WebSocketContainer
 
 @ApplicationScoped
 class WebSocketController {
@@ -20,6 +20,10 @@ class WebSocketController {
 
     @Inject
     CityHallMartialStatusFlow flow
+
+    @Inject
+    @AggressiveConnectionStrategyType
+    ConnectionStrategy connectionStrategy
 
     void run(CityHallMartialStatusProgramClient client) {
 
@@ -35,13 +39,23 @@ class WebSocketController {
         try {
             flow.phaser.register()
             log.info("Connecting to: {}", configuration.network.webSocketUrl)
-            WebSocketContainer webSocketContainer = ContainerProvider.getWebSocketContainer()
-            Session session = webSocketContainer.connectToServer(client,
-                    URI.create(configuration.network.webSocketUrl))
+            WebSocketConnection connection = new WebSocketConnection(
+                    configuration.network.webSocketUrl,
+                    client,
+                    configuration.network.connection.socketConnectionTimeout,
+                    connectionStrategy
+            )
+
+            connection.connect {}
+
+            connection.await()
+
             flow.waitUntilEnd()
             log.info("Closed by not open yet: {}", flow.closedByNotOpenYet)
+
             return !flow.closedByNotOpenYet && !flow.makeNewAppointment
         } catch (DeploymentException exception) {
+            log.info("Catch deployment exception", exception)
             flow.signalEnd()
             return false
         }

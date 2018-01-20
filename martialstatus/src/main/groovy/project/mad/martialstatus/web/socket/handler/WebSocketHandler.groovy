@@ -1,14 +1,18 @@
 package project.mad.martialstatus.web.socket.handler
 
-import sun.misc.HexDumpEncoder
+import project.mad.martialstatus.config.AvailableFields
+import project.mad.martialstatus.config.Configuration
 
 import javax.json.JsonObject
 import javax.websocket.Session
 import java.security.MessageDigest
 
-interface WebSocketHandler extends WebSocketHandlerSessionKeyConstructor {
+interface WebSocketHandler extends WebSocketHandlerSessionKeyConstructor,
+        WebSocketHandlerValidFieldsChecker {
 
     boolean accept(JsonObject object, Session session)
+
+    boolean accept(JsonObject object, Session session, Configuration configuration)
 
     void handle(JsonObject object, Session session)
 
@@ -31,5 +35,14 @@ trait WebSocketHandlerSessionKeyConstructor {
     public static String toHex(byte[] bytes) {
         BigInteger bi = new BigInteger(1, bytes)
         return String.format("%0" + (bytes.length << 1) + "x", bi)
+    }
+}
+
+trait WebSocketHandlerValidFieldsChecker {
+    boolean hasValidFields(AvailableFields availableFields, JsonObject object) {
+        object.entrySet().find {
+            entry ->
+                availableFields.validFields.contains(entry.key)
+        }
     }
 }

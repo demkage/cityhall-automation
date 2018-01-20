@@ -1,21 +1,45 @@
 {
   "network": {
-    "webSocketUrl" : "ws://localhost:8181/api/core/",
-    "httpUrl" : "http://programari.starecivila1.ro",
-    "retryTimeMs" : 5000,
-    "userAgent" : "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/63.0.3239.84 Chrome/63.0.3239.84 Safari/537.36"
-
+    "webSocketUrl": "ws://localhost:8181/api/core/",
+    "httpUrl": "http://localhost:8181",
+    "retryTimeMs": 5000,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/63.0.3239.84 Chrome/63.0.3239.84 Safari/537.36",
+    "connection": {
+      "httpConnectionTimeout": 10000,
+      "socketConnectionTimeout": 10000,
+      "parallelConnections": 10,
+      "waitTimeBeforeRaiseNewConnection": 850
+    }
   },
   "appointmentStrategy": {
-    "maxAppointments" : 5,
-    "preferableDays" : ["08-12-2018", "06-01-2018", "23-04-2018"],
-    "ignoreDays" : ["21-11-2017"],
-    "anyDay" : false
+    "maxAppointments": 5,
+    "preferableDays": [
+      "08-12-2018",
+      "06-01-2018",
+      "23-04-2018"
+    ],
+    "ignoreDays": [
+      "21-11-2017"
+    ],
+    "anyDay": false
   },
-  "step1" : {
-    "actor" : 2,
-    "name" : "Absolute Test",
-    "cnp" : "idkwisthis4367",
-    "email" : "email@email.com"
+  "step1": {
+    "actor": 2,
+    "name": "Absolute Test",
+    "cnp": "idkwisthis4367",
+    "email": "email@email.com"
+  },
+  "availableFields": {
+    "validFields": [
+      "step",
+      "status",
+      "config",
+      "first",
+      "ticket",
+      "date_disponibile",
+      "version",
+      "key"
+    ],
+    "confirmStepField": "step"
   }
 }

@@ -2,10 +2,12 @@ package project.mad.martialstatus.web.socket.handler.steps
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import project.mad.martialstatus.config.Configuration
 import project.mad.martialstatus.web.socket.handler.AbstractSocketHandler
 import project.mad.martialstatus.web.socket.handler.qualifier.SecondStepHandlerType
 
 import javax.enterprise.context.ApplicationScoped
+import javax.inject.Inject
 import javax.json.JsonObject
 import javax.json.spi.JsonProvider
 import javax.websocket.Session
@@ -15,12 +17,15 @@ import javax.websocket.Session
 class SecondStepHandler extends AbstractSocketHandler {
     private final Logger log = LoggerFactory.getLogger(this.getClass())
 
+    @Inject
+    Configuration configuration
+
     Timer timer
 
     @Override
     boolean accept(JsonObject object, Session session) {
-        return super.accept(object, session) && (object.getInt("step") == 1 ||
-                object.getBoolean("timer", false))
+        return super.accept(object, session, configuration) &&
+                (object.getInt("step", 1) == 1 || isValidSecondStep(object))
     }
 
     @Override
@@ -49,5 +54,10 @@ class SecondStepHandler extends AbstractSocketHandler {
         }, 5000, 5000)
 
 
+    }
+
+    private boolean isValidSecondStep(JsonObject object) {
+        return (object.containsKey("ticket") && object.containsKey("first")) ||
+                object.containsKey("timer")
     }
 }

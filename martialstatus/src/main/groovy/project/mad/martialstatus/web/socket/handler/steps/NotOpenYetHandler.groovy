@@ -6,7 +6,6 @@ import project.mad.martialstatus.web.socket.handler.qualifier.NotOpenYetHandlerT
 
 import javax.enterprise.context.ApplicationScoped
 import javax.json.JsonObject
-import javax.websocket.DeploymentException
 import javax.websocket.Session
 
 @NotOpenYetHandlerType
@@ -14,7 +13,8 @@ import javax.websocket.Session
 class NotOpenYetHandler extends AbstractSocketHandler {
     @Override
     boolean accept(JsonObject object, Session session) {
-        return super.accept(object, session) && object.getInt("step") == 9
+        return super.accept(object, session) &&
+                (object.getInt("step", 9) == 9 && !object.containsKey("error"))
     }
 
     @Override

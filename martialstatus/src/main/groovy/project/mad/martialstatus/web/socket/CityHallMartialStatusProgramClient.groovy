@@ -6,6 +6,7 @@ import project.mad.martialstatus.web.socket.decoder.JsonDecoder
 import project.mad.martialstatus.web.socket.encoder.JsonEncoder
 import project.mad.martialstatus.web.socket.handler.WebSocketHandler
 import project.mad.martialstatus.web.socket.handler.exception.NotOpenYetException
+import project.mad.martialstatus.web.socket.handler.exception.ReceivedUnexpectedErrorException
 
 import javax.enterprise.context.Dependent
 import javax.enterprise.inject.Default
@@ -13,11 +14,7 @@ import javax.inject.Inject
 import javax.json.JsonObject
 import javax.json.JsonObjectBuilder
 import javax.json.spi.JsonProvider
-import javax.websocket.ClientEndpoint
-import javax.websocket.OnClose
-import javax.websocket.OnMessage
-import javax.websocket.OnOpen
-import javax.websocket.Session
+import javax.websocket.*
 
 @Dependent
 @ClientEndpoint(encoders = [JsonEncoder.class], decoders = [JsonDecoder.class])
@@ -64,8 +61,11 @@ class CityHallMartialStatusProgramClient {
             try {
                 socketHandler.handle(message, session)
             } catch (NotOpenYetException exception) {
-                log.info("{}", exception.class.toGenericString())
+                log.info("Exception: {}", exception.class.toString())
                 flow.closedByNotOpenYet = true
+                flow.signalEnd()
+            } catch (ReceivedUnexpectedErrorException exception) {
+                log.info("Exception: {}", exception.class.toString())
                 flow.signalEnd()
             }
         }

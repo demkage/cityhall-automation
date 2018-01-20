@@ -1,17 +1,12 @@
 package project.mad.martialstatus.config
 
 import org.slf4j.LoggerFactory
+import project.mad.martialstatus.web.connection.strategy.qualifier.ConnectionStrategyExecutorService
 import project.mad.martialstatus.web.http.client.RoDistrict1HallMartialStatusHttpClient
 import project.mad.martialstatus.web.http.qualifier.SecretKeysType
 import project.mad.martialstatus.web.socket.handler.WebSocketHandler
 import project.mad.martialstatus.web.socket.handler.WebSocketHandlerChain
-import project.mad.martialstatus.web.socket.handler.qualifier.BackupSelectAppointmentStrategy
-import project.mad.martialstatus.web.socket.handler.qualifier.ConfirmStepHandlerType
-import project.mad.martialstatus.web.socket.handler.qualifier.FirstStepHandlerType
-import project.mad.martialstatus.web.socket.handler.qualifier.NotOpenYetHandlerType
-import project.mad.martialstatus.web.socket.handler.qualifier.SecondStepHandlerType
-import project.mad.martialstatus.web.socket.handler.qualifier.ThirdStepHandlerType
-import project.mad.martialstatus.web.socket.handler.qualifier.WebSocketHandlerChainType
+import project.mad.martialstatus.web.socket.handler.qualifier.*
 import project.mad.martialstatus.web.socket.handler.strategy.SelectAppointWithMostRecordsAvailableAndIgnoreDays
 import project.mad.martialstatus.web.socket.handler.strategy.SelectAppointmentWithMostRecordsAvailable
 import project.mad.martialstatus.web.socket.handler.strategy.SelectAppointmentWithPreferableDays
@@ -21,6 +16,8 @@ import javax.enterprise.context.Dependent
 import javax.enterprise.inject.Default
 import javax.enterprise.inject.Produces
 import javax.inject.Inject
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 class ApplicationConfig {
 
@@ -44,12 +41,27 @@ class ApplicationConfig {
     @Inject
     WebSocketHandler notOpenYetHandler
 
+    @UpdateQueueHandlerType
+    @Inject
+    WebSocketHandler updateQueueHandler
+
+    @ErrorHandlerType
+    @Inject
+    WebSocketHandler errorHandler
+
     @Inject
     RoDistrict1HallMartialStatusHttpClient client
 
     @Default
     @Inject
     Configuration configuration
+
+
+    @Produces
+    @ConnectionStrategyExecutorService
+    ExecutorService connectionStrategyExecutorService() {
+        Executors.newFixedThreadPool(configuration.network.connection.parallelConnections)
+    }
 
     //FIXME: redundant
     @Produces
@@ -71,7 +83,7 @@ class ApplicationConfig {
         LoggerFactory.getLogger(this.getClass())
                 .info("Keys. '{}' : '{}'", keys.get("first"), keys.get("second"))
 
-        return keys
+        return new HashMap()
     }
 
     @Produces
@@ -114,6 +126,8 @@ class ApplicationConfig {
         webSocketHandlerChain.handlers.add(thirdStepHandler)
         webSocketHandlerChain.handlers.add(confirmStepHandler)
         webSocketHandlerChain.handlers.add(notOpenYetHandler)
+        webSocketHandlerChain.handlers.add(updateQueueHandler)
+        webSocketHandlerChain.handlers.add(errorHandler)
 
         return webSocketHandlerChain
     }
